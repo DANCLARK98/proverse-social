@@ -207,7 +207,21 @@ def main():
     live_ig = {first(m.get('caption')) for m in call('GET', f"{ig['id']}/media", {'fields': 'caption', 'limit': 100}).get('data', [])} if ig else set()
     live_fb = {first(p.get('message')) for p in fbcall(page, 'GET', f"{page['id']}/posts", {'fields': 'message', 'limit': 100}).get('data', [])} if page else set()
     stamp = lambda: f'{dt.datetime.now(UK):%Y-%m-%d %H:%M}'
+
+    def live(r):  # all media reachable? (GitHub Pages can lag a minute after a push)
+        for f in set(items(r) + [f[:2] + '.jpg' for f in items(r)]):
+            try:
+                with urllib.request.urlopen(urllib.request.Request(url(r, f), method='HEAD'), timeout=20) as h:
+                    if h.status != 200:
+                        return False
+            except Exception:
+                return False
+        return True
+
     for r in due:
+        if not live(r):
+            log(f"{r['id']}: media not live yet at {BASE}, will retry next run")
+            continue
         if ig and r['status'] == 'ready':
             if first(r['caption']) in live_ig:
                 r['status'], r['posted_at'] = 'posted', 'already on feed'
