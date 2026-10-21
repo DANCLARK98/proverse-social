@@ -2,7 +2,14 @@ name: Post due carousels
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 minutes (GitHub may run a few minutes late)
+    # Fixed times (UTC) just after the 12:30 UK slot, for both BST (11:30 UTC) and GMT (12:30 UTC),
+    # plus catch-ups. GitHub throttles frequent schedules; fixed times run far more reliably.
+    - cron: "34 11 * * *"
+    - cron: "47 11 * * *"
+    - cron: "34 12 * * *"
+    - cron: "47 12 * * *"
+    - cron: "17 14 * * *"
+    - cron: "17 17 * * *"
   workflow_dispatch: {}
 
 concurrency:
